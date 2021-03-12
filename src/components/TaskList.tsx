@@ -13,19 +13,40 @@ interface Task {
 export function TaskList() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [isCompleted, setIsCompleted] = useState(true)
+  const [isEmpty, setIsEmpty] = useState(true)
 
   function handleCreateNewTask() {
     // Crie uma nova task com um id random, não permita criar caso o título seja vazio.
+    if (newTaskTitle !== '') {
+      setNewTaskTitle('')
+      setIsEmpty(false)
+      setTasks([...tasks, {
+        id: Math.floor(Math.random() * 10000),
+        title: newTaskTitle,
+        isComplete: false
+      }])
+    }
   }
 
   function handleToggleTaskCompletion(id: number) {
     // Altere entre `true` ou `false` o campo `isComplete` de uma task com dado ID
+    let condition = false;
+    
+    const checkeds = tasks.filter(task => task.id === id )[0]
+    checkeds.isComplete === false ? condition = true : condition = false
+
+    setIsCompleted(!isCompleted)
+    checkeds.isComplete = condition
   }
 
-  function handleRemoveTask(id: number) {
+  function handleRemoveTask(id: number ) {
     // Remova uma task da listagem pelo ID
-  }
+    setTasks([...tasks].filter(task => task.id !== id ))
+    if (tasks.length === 1) setIsEmpty(true)
 
+  }
+  
   return (
     <section className="task-list container">
       <header>
@@ -45,8 +66,11 @@ export function TaskList() {
       </header>
 
       <main>
-        <ul>
-          {tasks.map(task => (
+        {isEmpty ? (
+          <p className="is-empty" >Não há nenhuma tarefa</p>
+        ) : (
+          <ul>
+          {tasks.map((task) => (
             <li key={task.id}>
               <div className={task.isComplete ? 'completed' : ''} data-testid="task" >
                 <label className="checkbox-container">
@@ -66,9 +90,11 @@ export function TaskList() {
               </button>
             </li>
           ))}
-          
         </ul>
+        )}
+        
       </main>
+    
     </section>
   )
 }
